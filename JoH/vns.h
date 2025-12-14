@@ -1,9 +1,12 @@
 #ifndef KMIS_VNS_H
 #define KMIS_VNS_H
 #include <cmath>
+#include <chrono>
+#include <vector>
 #include "graph.h"
 #include "vnd.h"
 #include "grasp.h"
+#include "vns-report.cpp"
 
 using namespace std;
 
@@ -27,7 +30,7 @@ void liberarLista(Lista* fila);
 //##############################################################################
 
 /**Algoritmo VNS Reativo.**/
-Solucao VNS_Reativo(Graph &graph, Solucao &solucao_entrada);
+std::vector<VNSReport> VNS_Reativo(Graph &graph, Solucao &solucao_entrada, std::chrono::high_resolution_clock::time_point start_time);
 
 
 

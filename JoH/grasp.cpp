@@ -236,6 +236,7 @@ int Grasp::get_alfa(){
     #endif
 
     for(int i = 0; i < 11; i++) if(x <= prob_acumulativa[i]) return i;
+    return 10; // Default fallback
 }
 
 
