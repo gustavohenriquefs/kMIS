@@ -31,17 +31,15 @@ void execute_vns_repeat_armazenar(string file, Graph& graph, string nameFileOut,
   cout << "Executing VNS on file: " << file << ", countTime: " << countTime << endl;
   double tempo;
 
-  FILE* txt;
-
+  
   auto start_time_init = get_current_time();
-  std::vector<VNSReport> reports_init;
-  Solucao solucaoH = heuristica_kinter_estendida_path_relinking(graph, start_time_init, reports_init);
-  int sol_entrada = solucaoH.vectorBits.count();
-  vector<double> tempos;
-
-  std::vector<VNSReport> reports;
-
+  
+  std::vector<VNSReport> all_reports;
+  
   for (int i = 1; i <= countTime; i++) {
+    Solucao solucaoH = heuristica_kinter_estendida_path_relinking(graph, start_time_init, all_reports);
+    int sol_entrada = solucaoH.vectorBits.count();
+
     auto start_time = get_current_time();
 
     Solucao solucao = solucaoH;
@@ -50,14 +48,16 @@ void execute_vns_repeat_armazenar(string file, Graph& graph, string nameFileOut,
     int sol_heuristica = solucao.vectorBits.count();
 
     if (sol_heuristica < graph.tam_R) {
-      reports = VNS_Reativo(graph, solucao, start_time);
+      std::vector<VNSReport> reports_vns = VNS_Reativo(graph, solucao, start_time);
+      all_reports.insert(all_reports.end(), reports_vns.begin(), reports_vns.end());
     }
 
-    tempos.push_back(tempo);
   }
+
+  FILE* txt;
   txt = fopen(nameFileOut.c_str(), "a+");
 
-  for (auto report : reports) {
+  for (auto report : all_reports) {
     // save each report
     fprintf(txt, "%s,", file.c_str());
     fprintf(txt, "%d,", report.k);
