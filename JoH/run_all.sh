@@ -43,32 +43,21 @@ done
 
 echo ""
 echo "============================================"
-echo "Executando os experimentos..."
+echo "Executando os experimentos sequencialmente..."
 echo "============================================"
 
-# Array para armazenar PIDs dos processos
-PIDS=()
-
-# Executar cada binario em paralelo
+# Executar cada binario sequencialmente (um de cada vez)
 for TYPE in "${TYPES[@]}"; do
     BINARY="./expKMIS-$TYPE"
     if [ -f "$BINARY" ]; then
-        echo "Iniciando $BINARY..."
-        $BINARY &
-        PIDS+=($!)
+        echo ""
+        echo "Executando $BINARY..."
+        echo "(Isso pode levar algum tempo dependendo do tamanho das instancias)"
+        $BINARY
+        echo "$BINARY finalizado!"
     else
         echo "Binario $BINARY nao encontrado!"
     fi
-done
-
-echo ""
-echo "Aguardando execucao dos experimentos..."
-echo "(Isso pode levar algum tempo dependendo do tamanho das instancias)"
-
-# Aguardar todos os processos terminarem
-for PID in "${PIDS[@]}"; do
-    wait $PID
-    echo "Processo $PID finalizado"
 done
 
 echo ""
