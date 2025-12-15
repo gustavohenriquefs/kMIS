@@ -4,6 +4,9 @@
 
 #include "heuristics.h"
 
+#define get_current_time() std::chrono::high_resolution_clock::now()
+#define TIME_DIFF(start, end) std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+
 /**
 Heurística gulosa do artigo do sbpo 2013.
 Heurística kInter.
@@ -106,9 +109,11 @@ Solucao heuristica_kinter_estendida(Graph &graph){
 Heurística kInter estendida sendo que sempre gero a solução mesmo que a solução parcial tenha valor
 menor que a melhor até agora encotrado.
 **/
-Solucao heuristica_kinter_estendida_path_relinking(Graph &graph){
+Solucao heuristica_kinter_estendida_path_relinking(Graph& graph, std::chrono::high_resolution_clock::time_point start_time, std::vector<VNSReport>& reports) {
     Grasp grasp(graph);
+    
     //solucoes_elites.clear();
+
     vector<Elemento> conjuntos, conjuntosPrincipalAux = graph.conjuntosPrincipal;
     int custo_melhor_solucao = 0;
     bitset<nElem> bitset_melhor_solucao;
@@ -152,9 +157,15 @@ Solucao heuristica_kinter_estendida_path_relinking(Graph &graph){
             solucao_path.is_elem[solucao_parcial[i]] = true;
         }
 
+        // save report
+        float duration_ms = TIME_DIFF(start_time, get_current_time());
+
+        reports.push_back(VNSReport(graph.k, duration_ms, solucao_path.vectorBits.count()));
+
         if(grasp.solucoes_elites.size() >= 1){
-                solucao_path = grasp.path_relinking(solucao_path);
+            solucao_path = grasp.path_relinking(solucao_path, reports, start_time);
         }
+
         if(grasp.solucoes_elites.size() < grasp.max_elite) grasp.solucoes_elites.push_back(solucao_path);
         else{
                 int menor_dif = graph.k + 12;
@@ -177,6 +188,11 @@ Solucao heuristica_kinter_estendida_path_relinking(Graph &graph){
             custo_melhor_solucao = solucao_path.vectorBits.count();
             bitset_melhor_solucao = solucao_path.vectorBits;
             melhor_solucao = solucao_path.elem;
+
+            // save report
+            duration_ms = TIME_DIFF(start_time, get_current_time());
+            reports.push_back(VNSReport(graph.k, duration_ms, solucao_path.vectorBits.count()));
+
             if(custo_melhor_solucao == graph.tam_R) break;
         }
 
@@ -194,5 +210,9 @@ Solucao heuristica_kinter_estendida_path_relinking(Graph &graph){
     for(int i = 0; i < melhor_solucao.size(); i++){
         solucao.is_elem[melhor_solucao[i]] = true;
     }
+    // save report
+    float duration_ms = TIME_DIFF(start_time, get_current_time());
+    reports.push_back(VNSReport(graph.k, duration_ms, solucao.vectorBits.count()));
+    
     return solucao;
 }

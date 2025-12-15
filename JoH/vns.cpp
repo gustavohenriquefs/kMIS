@@ -210,7 +210,7 @@ std::vector<VNSReport> VNS_Reativo(Graph& graph, Solucao& solucao_entrada, std::
         auto end_time = get_current_time();
         float duration_ms = TIME_DIFF(start_time, end_time);
 
-        reports.push_back(VNSReport("instance", graph.k, duration_ms, solucao_candidata.vectorBits.count(), solucao.vectorBits.count()));
+        reports.push_back(VNSReport( graph.k, duration_ms, solucao.vectorBits.count()));
 
         solucao_candidata = solucao_linha;
         q = 1;

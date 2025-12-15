@@ -1,5 +1,6 @@
 #include "grasp.h"
-
+#define get_current_time() std::chrono::high_resolution_clock::now()
+#define TIME_DIFF(start, end) std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
 
 Grasp::Grasp(Graph &graph){
     this->graph = graph;
@@ -132,7 +133,7 @@ void Grasp::busca_local(Solucao &solucao){
 Path Relinking ele recebe duas soluções, origem e destino, e realiza trocas que transforma a solução origem na destino,
 sendo que a cada troca verificar se melhorou o valor da solução.
 **/
-Solucao Grasp::path_relinking(Solucao &solucao){
+Solucao Grasp::path_relinking(Solucao &solucao, std::vector<VNSReport> &reports, std::chrono::high_resolution_clock::time_point start_time) {
     Solucao origem = solucao;//A solução passado como parâmetro será a solução origem.
 
     //Seleciono a solução destino de forma aleatória.
@@ -144,15 +145,19 @@ Solucao Grasp::path_relinking(Solucao &solucao){
     if(origem.vectorBits.count() > destino.vectorBits.count()){
         melhor_solucao = origem;
         valor_melhor_solucao = origem.vectorBits.count();
+
     }
     else{
         melhor_solucao = destino;
         valor_melhor_solucao = destino.vectorBits.count();
-
+        
         destino = origem;
         origem = melhor_solucao;
     }
-
+    
+    // save report
+    reports.push_back(VNSReport(graph.k, TIME_DIFF(start_time, get_current_time()), melhor_solucao.vectorBits.count()));
+    
     int difsi = diferenca_simetrica(origem, destino, graph.k);
     while(difsi > 0){//Enquanto a solução origem não foi transformada na solução destino, continue.
         /*Bitset com a Interseção dos subconjuntos que estão ao mesmo tempo da origem e destino. Ou caras que irão permanecer na origem*/
@@ -213,6 +218,8 @@ Solucao Grasp::path_relinking(Solucao &solucao){
         if(origem.vectorBits.count() > valor_melhor_solucao){//Melhorou?
             melhor_solucao = origem;
             valor_melhor_solucao = origem.vectorBits.count();
+            // save report
+            reports.push_back(VNSReport(graph.k, TIME_DIFF(start_time, get_current_time()), origem.vectorBits.count()));
         }
         difsi = diferenca_simetrica(origem, destino, graph.k);
 
@@ -288,7 +295,7 @@ void Grasp::atualizacao_probabilidade(int Z_max){
 	}
 }
 
-Solucao Grasp::grasp(){
+Solucao Grasp::grasp(std::vector<VNSReport> &reports, std::chrono::high_resolution_clock::time_point start_time){
     #ifdef DEBUG
         cout << "-----------GRASP------" << endl;
     #endif
@@ -351,7 +358,7 @@ Solucao Grasp::grasp(){
 					*/
 
 					if(solucoes_elites.size() >= 1){
-							solucao = path_relinking(solucao);
+							solucao = path_relinking(solucao, reports, start_time);
 					}
 					//Atualizo a lista elite.
 					if(solucoes_elites.size() < max_elite) solucoes_elites.push_back(solucao);
@@ -397,7 +404,7 @@ Solucao Grasp::grasp(){
 
 
 
-Solucao Grasp::grasp_reativo(){
+Solucao Grasp::grasp_reativo(std::vector<VNSReport>& reports, std::chrono::high_resolution_clock::time_point start_time){
     #ifdef DEBUG
         cout << "-----------GRASP------" << endl;
     #endif
@@ -457,7 +464,7 @@ Solucao Grasp::grasp_reativo(){
 					*/
 
 					if(solucoes_elites.size() >= 1){
-							solucao = path_relinking(solucao);
+							solucao = path_relinking(solucao, reports, start_time);
 					}
 					//Atualizo a lista elite.
 					if(solucoes_elites.size() < max_elite) solucoes_elites.push_back(solucao);

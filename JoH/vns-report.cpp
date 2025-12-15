@@ -6,18 +6,15 @@
 using namespace std;
 
 struct VNSReport {
-  string instanceName;
-
   int k;
 
   float duration_ms;
 
-  int initial_solution_ans;
   int ans;
 
-  VNSReport(string instanceName, int k, float duration_ms, int initial_solution_ans, int ans)
-      : instanceName(instanceName), k(k), duration_ms(duration_ms), initial_solution_ans(initial_solution_ans), ans(ans) {
+  VNSReport(int k, float duration_ms, int ans)
+      : k(k), duration_ms(duration_ms), ans(ans) {
   }
 };
 
-#endif // VNS_REPORT_H
+#endif  // VNS_REPORT_H

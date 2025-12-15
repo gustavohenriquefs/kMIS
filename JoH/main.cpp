@@ -33,7 +33,9 @@ void execute_vns_repeat_armazenar(string file, Graph& graph, string nameFileOut,
 
   FILE* txt;
 
-  Solucao solucaoH = heuristica_kinter_estendida_path_relinking(graph);
+  auto start_time_init = get_current_time();
+  std::vector<VNSReport> reports_init;
+  Solucao solucaoH = heuristica_kinter_estendida_path_relinking(graph, start_time_init, reports_init);
   int sol_entrada = solucaoH.vectorBits.count();
   vector<double> tempos;
 
@@ -60,7 +62,7 @@ void execute_vns_repeat_armazenar(string file, Graph& graph, string nameFileOut,
     fprintf(txt, "%s,", file.c_str());
     fprintf(txt, "%d,", report.k);
     fprintf(txt, "%f,", report.duration_ms);
-    fprintf(txt, "%d,%d\n", report.initial_solution_ans, report.ans);
+    fprintf(txt, "%d\n", report.ans);
   }
   fclose(txt);
 
@@ -75,30 +77,33 @@ void execute_vns_repeat_armazenar(string file, Graph& graph, string nameFileOut,
 Run the vns 10 times generating the average of the solutions found, as well as the best, worst solution and average time.
 **/
 void execute_vns_repeat(string file, Graph& graph, string nameFileOut, int countTime) {
-  Solucao solucaoH = heuristica_kinter_estendida_path_relinking(graph);
   FILE* txt;
-  std::vector<VNSReport> reports;
-  int sol_entrada = solucaoH.vectorBits.count();
+  std::vector<VNSReport> all_reports;
 
   for (int i = 1; i <= countTime; i++) {
     auto start_time = get_current_time();
+
+    Solucao solucaoH = heuristica_kinter_estendida_path_relinking(graph, start_time, all_reports);
+
+    int sol_entrada = solucaoH.vectorBits.count();
+
     Solucao solucao = solucaoH;
+
     int sol_heuristica = solucao.vectorBits.count();
-    auto end_time = get_current_time();
 
     if (sol_heuristica < graph.tam_R) {
-      reports = VNS_Reativo(graph, solucao, start_time);
+      std::vector<VNSReport> reports_vns = VNS_Reativo(graph, solucao, start_time);
+      all_reports.insert(all_reports.end(), reports_vns.begin(), reports_vns.end());
     }
-    reports.push_back(VNSReport(file, graph.k, TIME_DIFF(start_time, end_time), sol_entrada, solucao.vectorBits.count()));
   }
-
   txt = fopen(nameFileOut.c_str(), "a+");
-  for (auto report : reports) {
+
+  for (auto report : all_reports) {
     // save each report
     fprintf(txt, "%s,", file.c_str());
     fprintf(txt, "%d,", report.k);
     fprintf(txt, "%f,", report.duration_ms);
-    fprintf(txt, "%d,%d\n", report.initial_solution_ans, report.ans);
+    fprintf(txt, "%d\n", report.ans);
   }
   fclose(txt);
 }
@@ -117,9 +122,12 @@ void execute_grasp(string file, Graph& graph, int countTime) {
   pior_solucao = graph.tam_R;
 
   Grasp grasp(graph);
+  std::vector<VNSReport> reports;
+
   for (int i = 1; i <= countTime; i++) {
-    t1 = clock();
-    Solucao sol = grasp.grasp_reativo();
+    auto start_time = get_current_time();
+
+    Solucao sol = grasp.grasp_reativo(reports, start_time);
     valor_solucao = sol.vectorBits.count();
     t2 = clock();
     tempo = (t2 - t1) / (double)CLOCKS_PER_SEC;
@@ -160,9 +168,10 @@ void execute_grasp_armazenar(string file, Graph& graph, string nameFileOut, stri
   Grasp grasp(graph);
   vector<int> solucoes;
   vector<double> tempos;
+  std::vector<VNSReport> reports;
   for (int i = 1; i <= countTime; i++) {
-    t1 = clock();
-    Solucao sol = grasp.grasp_reativo();
+    auto start_time = get_current_time();
+    Solucao sol = grasp.grasp_reativo(reports, start_time);
     valor_solucao = sol.vectorBits.count();
     t2 = clock();
     tempo = (t2 - t1) / (double)CLOCKS_PER_SEC;

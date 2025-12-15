@@ -1,25 +1,29 @@
 #ifndef KMIS_HEURISTICS_H
 #define KMIS_HEURISTICS_H
 
+#include <chrono>
+#include <vector>
+
 #include "graph.h"
 #include "grasp.h"
+#include "vns-report.cpp"
 
 using namespace std;
 
 /**
-Heurística kInter (Artigo do sbpo 2013).
+Heurï¿½stica kInter (Artigo do sbpo 2013).
 **/
-Solucao heuristica_kinter(Graph &graph);
+Solucao heuristica_kinter(Graph& graph);
 
 /**
-Heurística kInter estendida.
+Heurï¿½stica kInter estendida.
 **/
-Solucao heuristica_kinter_estendida(Graph &graph);
+Solucao heuristica_kinter_estendida(Graph& graph);
 
 /**
-Heurística kInter estendida sendo que sempre gero a solução mesmo que a solução parcial tenha valor
-menor que a melhor até agora encotrado.
+HeurÃ­stica kInter estendida sendo que sempre gero a soluÃ§Ã£o mesmo que a soluÃ§Ã£o parcial tenha valor
+menor que a melhor atÃ© agora encontrado.
 **/
-Solucao heuristica_kinter_estendida_path_relinking(Graph &graph);
+Solucao heuristica_kinter_estendida_path_relinking(Graph& graph, std::chrono::high_resolution_clock::time_point start_time, std::vector<VNSReport>& reports);
 
-#endif // KMIS_HEURISTICS_H
+#endif  // KMIS_HEURISTICS_H

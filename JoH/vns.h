@@ -30,7 +30,7 @@ void liberarLista(Lista* fila);
 //##############################################################################
 
 /**Algoritmo VNS Reativo.**/
-std::vector<VNSReport> VNS_Reativo(Graph &graph, Solucao &solucao_entrada, std::chrono::high_resolution_clock::time_point start_time);
+std::vector<VNSReport> VNS_Reativo(Graph& graph, Solucao& solucao_entrada, std::chrono::high_resolution_clock::time_point start_time);
 
 
 
